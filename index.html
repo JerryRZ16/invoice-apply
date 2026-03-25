@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>电子发票申请</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100vh;
+  }
+
+  /* 顶部导航 */
+  .nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    background: #fff;
+    position: relative;
+    border-bottom: 1px solid #eee;
+  }
+  .nav-bar .back {
+    position: absolute;
+    left: 16px;
+    font-size: 20px;
+    color: #333;
+    text-decoration: none;
+  }
+  .nav-bar .title {
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  /* 金额区域 */
+  .amount-section {
+    background: #fff;
+    padding: 32px 16px;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .amount-label {
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 8px;
+  }
+  .amount-value {
+    font-size: 36px;
+    font-weight: 700;
+    color: #e84d3a;
+  }
+  .amount-value .currency {
+    font-size: 20px;
+    margin-right: 2px;
+  }
+
+  /* 表单区域 */
+  .form-section {
+    background: #fff;
+    padding: 0 16px;
+    margin-bottom: 10px;
+  }
+  .form-item {
+    display: flex;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .form-item:last-child {
+    border-bottom: none;
+  }
+  .form-label {
+    font-size: 15px;
+    color: #333;
+    width: 110px;
+    flex-shrink: 0;
+  }
+  .form-value {
+    flex: 1;
+    font-size: 15px;
+    color: #333;
+    text-align: right;
+    word-break: break-all;
+  }
+  .form-value.placeholder {
+    color: #ccc;
+  }
+  .form-arrow {
+    margin-left: 8px;
+    color: #ccc;
+    font-size: 14px;
+  }
+
+  /* 发票类型选择 */
+  .invoice-type-section {
+    background: #fff;
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+  .section-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .type-options {
+    display: flex;
+    gap: 12px;
+  }
+  .type-option {
+    flex: 1;
+    padding: 14px 12px;
+    border: 2px solid #eee;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .type-option.active {
+    border-color: #4a90d9;
+    color: #4a90d9;
+    background: rgba(74, 144, 217, 0.04);
+  }
+  .type-option.active::after {
+    content: "✓";
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    font-size: 12px;
+    color: #4a90d9;
+    font-weight: bold;
+  }
+
+  /* 邮箱输入 */
+  .email-section {
+    background: #fff;
+    padding: 0 16px;
+    margin-bottom: 10px;
+  }
+  .email-input {
+    width: 100%;
+    padding: 16px 0;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    color: #333;
+    background: transparent;
+  }
+  .email-input::placeholder {
+    color: #ccc;
+  }
+
+  /* 底部按钮 */
+  .bottom-bar {
+    padding: 16px;
+    margin-top: 30px;
+  }
+  .submit-btn {
+    width: 100%;
+    padding: 15px;
+    background: #333;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .submit-btn:active {
+    opacity: 0.8;
+  }
+</style>
+</head>
+<body>
+
+<!-- 导航栏 -->
+<div class="nav-bar">
+  <a class="back" href="javascript:void(0)">‹</a>
+  <span class="title">电子发票申请</span>
+</div>
+
+<!-- 发票金额 -->
+<div class="amount-section">
+  <div class="amount-label">发票金额</div>
+  <div class="amount-value"><span class="currency">¥</span>87.66</div>
+</div>
+
+<!-- 购方抬头 -->
+<div class="form-section">
+  <div class="form-item">
+    <span class="form-label">企业名称</span>
+    <span class="form-value">上海茶姬企业管理有限公司遵义路第一分公司</span>
+    <span class="form-arrow">›</span>
+  </div>
+  <div class="form-item">
+    <span class="form-label">纳税人识别号</span>
+    <span class="form-value">91310105MAK2PBEG1U</span>
+    <span class="form-arrow">›</span>
+  </div>
+</div>
+
+<!-- 发票类型 -->
+<div class="invoice-type-section">
+  <div class="section-title">发票类型</div>
+  <div class="type-options">
+    <div class="type-option active" onclick="selectType(this)">数字电子专票</div>
+    <div class="type-option" onclick="selectType(this)">数字电子普票</div>
+  </div>
+</div>
+
+<!-- 邮箱 -->
+<div class="email-section">
+  <input class="email-input" type="email" placeholder="请输入电子邮箱">
+</div>
+
+<!-- 提交按钮 -->
+<div class="bottom-bar">
+  <button class="submit-btn">申请开票</button>
+</div>
+
+<script>
+function selectType(el) {
+  document.querySelectorAll('.type-option').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+}
+</script>
+
+</body>
+</html>

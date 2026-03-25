@@ -3,58 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>电子发票申请</title>
+<title>开票类目选择</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-    background: #f5f5f5;
-    color: #333;
-    max-width: 430px;
-    margin: 0 auto;
-    min-height: 100vh;
+    background: #f5f5f5; color: #333; max-width: 430px; margin: 0 auto; min-height: 100vh;
+    overflow-x: hidden;
   }
-
   .nav-bar {
     display: flex; align-items: center; justify-content: center;
     padding: 12px 16px; background: #fff; position: relative; border-bottom: 1px solid #eee;
   }
-  .nav-bar .back { position: absolute; left: 16px; font-size: 20px; color: #333; text-decoration: none; }
+  .nav-bar .back { position: absolute; left: 16px; font-size: 20px; color: #333; text-decoration: none; cursor: pointer; }
   .nav-bar .title { font-size: 17px; font-weight: 600; }
 
-  .amount-section {
-    background: #fff; padding: 32px 16px; text-align: center; margin-bottom: 10px;
+  /* 步骤指示器 */
+  .step-indicator {
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px 40px 16px; background: #fff; margin-bottom: 10px;
   }
-  .amount-label { font-size: 14px; color: #999; margin-bottom: 8px; }
-  .amount-value { font-size: 36px; font-weight: 700; color: #e84d3a; }
-  .amount-value .currency { font-size: 20px; margin-right: 2px; }
-
-  .form-section { background: #fff; padding: 0 16px; margin-bottom: 10px; }
-  .form-item {
-    display: flex; align-items: center; padding: 16px 0; border-bottom: 1px solid #f0f0f0;
+  .step-dot {
+    width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; border: 2px solid #ddd; color: #bbb; transition: all 0.3s;
   }
-  .form-item:last-child { border-bottom: none; }
-  .form-label { font-size: 15px; color: #333; width: 110px; flex-shrink: 0; }
-  .form-value { flex: 1; font-size: 15px; color: #333; text-align: right; word-break: break-all; }
-  .form-value.placeholder { color: #ccc; }
-  .form-arrow { margin-left: 8px; color: #ccc; font-size: 14px; }
+  .step-dot.active { background: #4a90d9; border-color: #4a90d9; color: #fff; }
+  .step-dot.done { background: #4a90d9; border-color: #4a90d9; color: #fff; }
+  .step-line { flex: 1; height: 2px; background: #eee; margin: 0 10px; transition: background 0.3s; }
+  .step-line.active { background: #4a90d9; }
+  .step-label { font-size: 11px; color: #999; margin-top: 4px; text-align: center; }
+  .step-item { display: flex; flex-direction: column; align-items: center; }
 
-  /* 开票类目 */
+  /* 页面容器 */
+  .pages-wrapper {
+    position: relative; overflow: hidden;
+  }
+  .page {
+    display: none; animation: fadeIn 0.3s ease;
+  }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+  /* Step 1: 类目选择 */
   .category-section { background: #fff; padding: 16px; margin-bottom: 10px; }
   .section-title { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
-  .category-group-label {
-    font-size: 12px; color: #999; margin-bottom: 8px; margin-top: 4px;
-  }
+  .category-group-label { font-size: 12px; color: #999; margin-bottom: 8px; margin-top: 4px; }
   .category-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
   .category-item {
-    display: flex; align-items: center; padding: 14px 14px;
-    border: 2px solid #eee; border-radius: 10px; cursor: pointer; transition: all 0.2s;
-    position: relative;
+    display: flex; align-items: center; padding: 14px;
+    border: 2px solid #eee; border-radius: 10px; cursor: pointer; transition: all 0.2s; position: relative;
   }
   .category-item.active { border-color: #4a90d9; background: rgba(74,144,217,0.04); }
   .category-item.active::after {
-    content: "✓"; position: absolute; top: 8px; right: 10px;
-    font-size: 12px; color: #4a90d9; font-weight: bold;
+    content: "✓"; position: absolute; top: 8px; right: 10px; font-size: 12px; color: #4a90d9; font-weight: bold;
   }
   .category-name { font-size: 14px; color: #333; }
   .category-item.active .category-name { color: #4a90d9; }
@@ -62,49 +63,14 @@
     display: inline-block; font-size: 11px; padding: 2px 6px; border-radius: 4px;
     margin-left: 8px; background: #fff3e0; color: #e67e22; font-weight: 500;
   }
+  .divider-line { height: 1px; background: #eee; margin: 6px 0 2px; }
 
-  .divider-line {
-    height: 1px; background: #eee; margin: 6px 0 2px;
-  }
-
-  /* 发票类型 - 置灰 */
-  .invoice-type-section { background: #fff; padding: 16px; margin-bottom: 10px; }
-  .type-options { display: flex; gap: 12px; }
-  .type-option {
-    flex: 1; padding: 14px 12px; border: 2px solid #eee; border-radius: 10px;
-    text-align: center; font-size: 14px; color: #999; position: relative;
-    transition: all 0.2s;
-  }
-  .type-option.active {
-    border-color: #4a90d9; color: #4a90d9; background: rgba(74,144,217,0.04);
-  }
-  .type-option.active::after {
-    content: "✓"; position: absolute; top: 6px; right: 8px;
-    font-size: 12px; color: #4a90d9; font-weight: bold;
-  }
-  .type-option.disabled {
-    opacity: 0.5; pointer-events: none; background: #fafafa;
-  }
-  .type-lock { font-size: 11px; color: #bbb; display: block; margin-top: 4px; }
-
-  /* 资质信息 */
-  .qualification-bar {
+  /* 加载 & 资质 */
+  .loading-bar {
     display: none; align-items: center; padding: 12px 16px;
-    background: #f0f7ff; margin: 0 0 10px; border-radius: 0;
-    font-size: 13px; color: #4a90d9;
+    background: #fffbe6; font-size: 13px; color: #d4a017; margin-bottom: 10px;
   }
-  .qualification-bar.visible { display: flex; }
-  .qualification-bar.error { background: #fff5f5; color: #e84d3a; }
-  .qualification-bar .qual-icon { margin-right: 8px; font-size: 16px; }
-  .qualification-bar .qual-text { flex: 1; }
-
-  /* 加载动画 */
-  .loading-overlay {
-    display: none; align-items: center; justify-content: center;
-    padding: 12px 16px; background: #fffbe6; margin: 0 0 10px;
-    font-size: 13px; color: #d4a017;
-  }
-  .loading-overlay.visible { display: flex; }
+  .loading-bar.visible { display: flex; }
   .spinner {
     width: 16px; height: 16px; border: 2px solid #d4a017;
     border-top-color: transparent; border-radius: 50%;
@@ -112,142 +78,220 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* 邮箱 */
-  .email-section { background: #fff; padding: 0 16px; margin-bottom: 10px; }
+  .qual-bar {
+    display: none; align-items: center; padding: 12px 16px;
+    background: #f0f7ff; font-size: 13px; color: #4a90d9; margin-bottom: 10px;
+  }
+  .qual-bar.visible { display: flex; }
+  .qual-bar .icon { margin-right: 8px; }
+
+  /* Step 2: 确认信息 */
+  .confirm-section { background: #fff; padding: 16px; margin-bottom: 10px; }
+  .confirm-row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 14px 0; border-bottom: 1px solid #f0f0f0;
+  }
+  .confirm-row:last-child { border-bottom: none; }
+  .confirm-label { font-size: 14px; color: #999; width: 100px; flex-shrink: 0; }
+  .confirm-value { font-size: 14px; color: #333; text-align: right; flex: 1; word-break: break-all; }
+  .confirm-value.highlight { color: #4a90d9; font-weight: 600; }
+  .confirm-value.amount { color: #e84d3a; font-size: 20px; font-weight: 700; }
+
+  .type-badge {
+    display: inline-block; padding: 4px 10px; border-radius: 6px;
+    background: rgba(74,144,217,0.08); color: #4a90d9; font-size: 13px; font-weight: 500;
+  }
+  .type-badge .lock { font-size: 11px; margin-left: 4px; }
+
+  .email-input-wrap { background: #fff; padding: 0 16px; margin-bottom: 10px; }
   .email-input {
     width: 100%; padding: 16px 0; border: none; outline: none;
     font-size: 15px; color: #333; background: transparent;
   }
   .email-input::placeholder { color: #ccc; }
 
-  .bottom-bar { padding: 16px; margin-top: 20px; }
-  .submit-btn {
+  /* 按钮 */
+  .btn-bar { padding: 16px; margin-top: 10px; }
+  .btn-primary {
     width: 100%; padding: 15px; background: #333; color: #fff;
-    font-size: 16px; font-weight: 600; border: none; border-radius: 25px;
-    cursor: pointer; transition: opacity 0.2s;
+    font-size: 16px; font-weight: 600; border: none; border-radius: 25px; cursor: pointer;
   }
-  .submit-btn:active { opacity: 0.8; }
+  .btn-primary:active { opacity: 0.8; }
+  .btn-primary:disabled { background: #ccc; }
+  .btn-secondary {
+    width: 100%; padding: 13px; background: #fff; color: #666;
+    font-size: 15px; border: 1px solid #ddd; border-radius: 25px; cursor: pointer; margin-top: 10px;
+  }
 </style>
 </head>
 <body>
 
-<!-- 导航栏 -->
 <div class="nav-bar">
-  <a class="back" href="javascript:void(0)">‹</a>
-  <span class="title">电子发票申请</span>
+  <a class="back" id="navBack">‹</a>
+  <span class="title" id="navTitle">选择开票类目</span>
 </div>
 
-<!-- 发票金额 -->
-<div class="amount-section">
-  <div class="amount-label">发票金额</div>
-  <div class="amount-value"><span class="currency">¥</span>87.66</div>
-</div>
-
-<!-- 购方抬头 -->
-<div class="form-section">
-  <div class="form-item">
-    <span class="form-label">企业名称</span>
-    <span class="form-value">上海茶姬企业管理有限公司遵义路第一分公司</span>
-    <span class="form-arrow">›</span>
+<!-- 步骤指示器 -->
+<div class="step-indicator">
+  <div class="step-item">
+    <div class="step-dot active" id="dot1">1</div>
+    <div class="step-label">选择类目</div>
   </div>
-  <div class="form-item">
-    <span class="form-label">纳税人识别号</span>
-    <span class="form-value">91310105MAK2PBEG1U</span>
-    <span class="form-arrow">›</span>
+  <div class="step-line" id="line1"></div>
+  <div class="step-item">
+    <div class="step-dot" id="dot2">2</div>
+    <div class="step-label">确认信息</div>
   </div>
 </div>
 
-<!-- 开票类目（分组） -->
-<div class="category-section">
-  <div class="section-title">开票类目</div>
+<div class="pages-wrapper">
 
-  <div class="category-group-label">原有类目</div>
-  <div class="category-list">
-    <div class="category-item active" onclick="selectCategory(this, false)">
-      <span class="category-name">现代服务*信息技术服务费</span>
+  <!-- Step 1: 类目选择 -->
+  <div class="page active" id="step1">
+    <div class="category-section">
+      <div class="section-title">请选择开票类目</div>
+
+      <div class="category-group-label">原有类目</div>
+      <div class="category-list">
+        <div class="category-item active" onclick="selectCategory(this, '现代服务*信息技术服务费', false)">
+          <span class="category-name">现代服务*信息技术服务费</span>
+        </div>
+        <div class="category-item" onclick="selectCategory(this, '现代服务*技术服务费', false)">
+          <span class="category-name">现代服务*技术服务费</span>
+        </div>
+      </div>
+
+      <div class="divider-line"></div>
+
+      <div class="category-group-label" style="margin-top:14px">新增类目</div>
+      <div class="category-list">
+        <div class="category-item" onclick="selectCategory(this, '生活服务*餐饮服务费', true)">
+          <span class="category-name">生活服务*餐饮服务费</span>
+          <span class="category-tag">需验证资质</span>
+        </div>
+      </div>
     </div>
-    <div class="category-item" onclick="selectCategory(this, false)">
-      <span class="category-name">现代服务*技术服务费</span>
+
+    <div class="loading-bar" id="loadingBar">
+      <div class="spinner"></div>
+      <span>正在查询纳税人资质，请稍候…</span>
+    </div>
+
+    <div class="qual-bar" id="qualBar">
+      <span class="icon">✅</span>
+      <span>资质验证通过 — 一般纳税人，可开具专票</span>
+    </div>
+
+    <div class="btn-bar">
+      <button class="btn-primary" id="nextBtn" onclick="goStep2()">下一步</button>
     </div>
   </div>
 
-  <div class="divider-line"></div>
+  <!-- Step 2: 确认信息 -->
+  <div class="page" id="step2">
+    <div class="confirm-section">
+      <div class="section-title">发票信息确认</div>
+      <div class="confirm-row">
+        <span class="confirm-label">发票金额</span>
+        <span class="confirm-value amount">¥87.66</span>
+      </div>
+      <div class="confirm-row">
+        <span class="confirm-label">企业名称</span>
+        <span class="confirm-value">上海茶姬企业管理有限公司遵义路第一分公司</span>
+      </div>
+      <div class="confirm-row">
+        <span class="confirm-label">纳税人识别号</span>
+        <span class="confirm-value">91310105MAK2PBEG1U</span>
+      </div>
+      <div class="confirm-row">
+        <span class="confirm-label">开票类目</span>
+        <span class="confirm-value highlight" id="confirmCategory">现代服务*信息技术服务费</span>
+      </div>
+      <div class="confirm-row">
+        <span class="confirm-label">发票类型</span>
+        <span class="confirm-value"><span class="type-badge" id="confirmType">数字电子专票<span class="lock">🔒</span></span></span>
+      </div>
+    </div>
 
-  <div class="category-group-label" style="margin-top:14px">新增类目</div>
-  <div class="category-list">
-    <div class="category-item" onclick="selectCategory(this, true)">
-      <span class="category-name">生活服务*餐饮服务费</span>
-      <span class="category-tag">需验证资质</span>
+    <div class="email-input-wrap">
+      <input class="email-input" type="email" placeholder="请输入接收邮箱">
+    </div>
+
+    <div class="btn-bar">
+      <button class="btn-primary" onclick="submitInvoice()">申请开票</button>
+      <button class="btn-secondary" onclick="goStep1()">返回修改</button>
     </div>
   </div>
-</div>
 
-<!-- 加载提示 -->
-<div class="loading-overlay" id="loadingBar">
-  <div class="spinner"></div>
-  <span>正在查询纳税人资质，请稍候…</span>
-</div>
-
-<!-- 资质结果 -->
-<div class="qualification-bar" id="qualBar">
-  <span class="qual-icon"></span>
-  <span class="qual-text"></span>
-</div>
-
-<!-- 发票类型（自动匹配，置灰不可改） -->
-<div class="invoice-type-section">
-  <div class="section-title">发票类型 <span style="font-size:12px;color:#999;font-weight:400">（根据资质自动匹配）</span></div>
-  <div class="type-options">
-    <div class="type-option active disabled" id="typeZhuan">数字电子专票<span class="type-lock">🔒 自动匹配</span></div>
-    <div class="type-option disabled" id="typePu">数字电子普票<span class="type-lock">🔒 自动匹配</span></div>
-  </div>
-</div>
-
-<!-- 邮箱 -->
-<div class="email-section">
-  <input class="email-input" type="email" placeholder="请输入电子邮箱">
-</div>
-
-<!-- 提交按钮 -->
-<div class="bottom-bar">
-  <button class="submit-btn">申请开票</button>
 </div>
 
 <script>
-function selectCategory(el, isNew) {
+let selectedCategory = '现代服务*信息技术服务费';
+let isNewCategory = false;
+let qualVerified = false;
+
+function selectCategory(el, name, isNew) {
   document.querySelectorAll('.category-item').forEach(o => o.classList.remove('active'));
   el.classList.add('active');
+  selectedCategory = name;
+  isNewCategory = isNew;
 
   const loadingBar = document.getElementById('loadingBar');
   const qualBar = document.getElementById('qualBar');
 
   if (isNew) {
-    // 新类目 → 触发资质查询
+    qualVerified = false;
     qualBar.classList.remove('visible');
     loadingBar.classList.add('visible');
-
-    // 模拟异步查询 1.5s
     setTimeout(() => {
       loadingBar.classList.remove('visible');
-      qualBar.className = 'qualification-bar visible';
-      qualBar.querySelector('.qual-icon').textContent = '✅';
-      qualBar.querySelector('.qual-text').textContent =
-        '资质验证通过 — 一般纳税人，可开具专票';
-
-      // 自动匹配为专票
-      document.getElementById('typeZhuan').classList.add('active');
-      document.getElementById('typePu').classList.remove('active');
+      qualBar.classList.add('visible');
+      qualVerified = true;
     }, 1500);
   } else {
-    // 原有类目 → 隐藏资质提示
     loadingBar.classList.remove('visible');
     qualBar.classList.remove('visible');
-
-    // 恢复默认专票
-    document.getElementById('typeZhuan').classList.add('active');
-    document.getElementById('typePu').classList.remove('active');
+    qualVerified = false;
   }
 }
+
+function goStep2() {
+  if (isNewCategory && !qualVerified) return;
+
+  document.getElementById('confirmCategory').textContent = selectedCategory;
+  document.getElementById('confirmType').innerHTML =
+    (isNewCategory ? '数字电子专票' : '数字电子专票') + '<span class="lock">🔒</span>';
+
+  document.getElementById('step1').classList.remove('active');
+  document.getElementById('step2').classList.add('active');
+
+  document.getElementById('dot1').classList.add('done');
+  document.getElementById('dot1').textContent = '✓';
+  document.getElementById('dot2').classList.add('active');
+  document.getElementById('line1').classList.add('active');
+  document.getElementById('navTitle').textContent = '确认发票信息';
+}
+
+function goStep1() {
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('step1').classList.add('active');
+
+  document.getElementById('dot1').classList.remove('done');
+  document.getElementById('dot1').textContent = '1';
+  document.getElementById('dot2').classList.remove('active');
+  document.getElementById('line1').classList.remove('active');
+  document.getElementById('navTitle').textContent = '选择开票类目';
+}
+
+function submitInvoice() {
+  alert('开票申请已提交');
+}
+
+document.getElementById('navBack').onclick = function() {
+  if (document.getElementById('step2').classList.contains('active')) {
+    goStep1();
+  }
+};
 </script>
 
 </body>
